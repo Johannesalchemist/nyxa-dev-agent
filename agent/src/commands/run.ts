@@ -4,8 +4,12 @@ import { execSync } from "child_process";
 import { updateSummary } from "../core/summaryEngine";
 import { ensureStructure } from "../core/structureGuard";
 
+function normalize(p: string): string {
+  return p.replace(/\\/g, "/");
+}
+
 function isSourceChange(filePath: string): boolean {
-  const normalized = filePath.replace(/\\/g, "/");
+  const normalized = normalize(filePath);
 
   if (
     normalized.startsWith("kernel/state/") ||
@@ -19,6 +23,12 @@ function isSourceChange(filePath: string): boolean {
   return true;
 }
 
+function extractFilePath(line: string): string {
+  const trimmed = line.trim();
+  const parts = trimmed.split(/\s+/);
+  return parts[parts.length - 1];
+}
+
 export function runCommand(): void {
   const rootPath = "C:\\Users\\Johannes\\nyxa-dev-agent";
   const statePath = path.join(rootPath, "kernel", "state");
@@ -26,7 +36,6 @@ export function runCommand(): void {
 
   ensureStructure(rootPath);
 
-  // 🔎 1️⃣ Check changes BEFORE summary update
   const statusRaw = execSync("git status --porcelain", { cwd: rootPath })
     .toString()
     .trim();
@@ -38,23 +47,24 @@ export function runCommand(): void {
   }
 
   const lines = statusRaw.split("\n");
-  const sourceChanges = lines
-    .map(line => line.substring(3))
+
+  const sourceFiles = lines
+    .map(extractFilePath)
     .filter(isSourceChange);
 
-  // 🧠 2️⃣ If no real source change → do NOT commit
-  if (sourceChanges.length === 0) {
+  if (sourceFiles.length === 0) {
     updateSummary(rootPath);
     console.log("[nyxa-agent] no source changes detected");
     return;
   }
 
-  // 🚀 3️⃣ Real source change
   const timestamp = new Date().toISOString();
 
   updateSummary(rootPath);
 
-  execSync("git add .", { cwd: rootPath });
+  for (const file of sourceFiles) {
+    execSync(`git add "${file}"`, { cwd: rootPath });
+  }
 
   const commitMessage = `[nyxa-agent] run :: ${timestamp}`;
   execSync(`git commit -m "${commitMessage}"`, { cwd: rootPath });
@@ -70,7 +80,7 @@ export function runCommand(): void {
 
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), { encoding: "utf8" });
 
-  execSync("git add kernel/state/meta.json", { cwd: rootPath });
+  execSync(`git add "kernel/state/meta.json"`, { cwd: rootPath });
 
   const syncMessage = `[nyxa-agent] sync meta :: ${timestamp}`;
   execSync(`git commit -m "${syncMessage}"`, { cwd: rootPath });
