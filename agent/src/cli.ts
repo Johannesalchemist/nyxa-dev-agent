@@ -7,7 +7,7 @@ function main(): void {
   const command = args[0];
 
   if (!command) {
-    console.error("No command provided.");
+    console.error("[nyxa-agent] no command provided");
     process.exit(1);
   }
 

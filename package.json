@@ -16,7 +16,9 @@
     "init": "node agent/dist/cli.js init",
     "run": "node agent/dist/cli.js run",
     "summarize": "node agent/dist/cli.js summarize",
-    "validate": "node agent/dist/cli.js validate"
+    "validate": "node agent/dist/cli.js validate",
+    "lab": "node agent/dist/cli.js lab",
+    "sync": "npm run build && node agent/dist/cli.js run && node agent/dist/cli.js validate"
   },
   "engines": {
     "node": ">=18.0.0"
