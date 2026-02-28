@@ -4,6 +4,21 @@ import { execSync } from "child_process";
 import { updateSummary } from "../core/summaryEngine";
 import { ensureStructure } from "../core/structureGuard";
 
+function isSourceChange(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, "/");
+
+  if (
+    normalized.startsWith("kernel/state/") ||
+    normalized.startsWith("agent/dist/") ||
+    normalized.startsWith("node_modules/") ||
+    normalized.startsWith(".git/")
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 export function runCommand(): void {
   const rootPath = "C:\\Users\\Johannes\\nyxa-dev-agent";
   const statePath = path.join(rootPath, "kernel", "state");
@@ -13,12 +28,22 @@ export function runCommand(): void {
 
   updateSummary(rootPath);
 
-  const status = execSync("git status --porcelain", { cwd: rootPath })
+  const statusRaw = execSync("git status --porcelain", { cwd: rootPath })
     .toString()
     .trim();
 
-  if (!status) {
+  if (!statusRaw) {
     console.log("[nyxa-agent] no changes detected");
+    return;
+  }
+
+  const lines = statusRaw.split("\n");
+  const sourceChanges = lines
+    .map(line => line.substring(3))
+    .filter(isSourceChange);
+
+  if (sourceChanges.length === 0) {
+    console.log("[nyxa-agent] no source changes detected");
     return;
   }
 
