@@ -36,16 +36,7 @@ export function initCommand(): void {
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), { encoding: "utf8" });
   fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2), { encoding: "utf8" });
 
-  // --- Git Integration ---
-  const commitHash = commitWithGit(rootPath, timestamp);
+  const commitHash = commitWithGit(rootPath, metaPath, timestamp);
 
-  // Update meta with real commit hash
-  const updatedMeta = {
-    ...meta,
-    lastCommitHash: commitHash
-  };
-
-  fs.writeFileSync(metaPath, JSON.stringify(updatedMeta, null, 2), { encoding: "utf8" });
-
-  console.log("[nyxa-agent] kernel initialized and committed");
+  console.log(`[nyxa-agent] kernel initialized and committed (${commitHash})`);
 }

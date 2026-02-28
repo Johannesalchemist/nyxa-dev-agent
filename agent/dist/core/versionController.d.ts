@@ -1,1 +1,1 @@
-export declare function commitWithGit(rootPath: string, timestamp: string): string;
+export declare function commitWithGit(rootPath: string, metaPath: string, timestamp: string): string;

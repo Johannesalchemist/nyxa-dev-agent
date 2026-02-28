@@ -30,13 +30,6 @@ function initCommand() {
     };
     fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), { encoding: "utf8" });
     fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2), { encoding: "utf8" });
-    // --- Git Integration ---
-    const commitHash = (0, versionController_1.commitWithGit)(rootPath, timestamp);
-    // Update meta with real commit hash
-    const updatedMeta = {
-        ...meta,
-        lastCommitHash: commitHash
-    };
-    fs.writeFileSync(metaPath, JSON.stringify(updatedMeta, null, 2), { encoding: "utf8" });
-    console.log("[nyxa-agent] kernel initialized and committed");
+    const commitHash = (0, versionController_1.commitWithGit)(rootPath, metaPath, timestamp);
+    console.log(`[nyxa-agent] kernel initialized and committed (${commitHash})`);
 }
