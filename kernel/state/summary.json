@@ -1,27 +1,6 @@
 {
   "projectStructure": [
-    "agent/dist/cli.d.ts",
-    "agent/dist/cli.js",
-    "agent/dist/commandRouter.d.ts",
-    "agent/dist/commandRouter.js",
-    "agent/dist/commands/init.d.ts",
-    "agent/dist/commands/init.js",
-    "agent/dist/commands/run.d.ts",
-    "agent/dist/commands/run.js",
-    "agent/dist/commands/summarize.d.ts",
-    "agent/dist/commands/summarize.js",
-    "agent/dist/commands/validate.d.ts",
-    "agent/dist/commands/validate.js",
-    "agent/dist/core/orchestrator.d.ts",
-    "agent/dist/core/orchestrator.js",
-    "agent/dist/core/structureGuard.d.ts",
-    "agent/dist/core/structureGuard.js",
-    "agent/dist/core/summaryEngine.d.ts",
-    "agent/dist/core/summaryEngine.js",
-    "agent/dist/core/versionController.d.ts",
-    "agent/dist/core/versionController.js",
-    "agent/dist/types.d.ts",
-    "agent/dist/types.js",
+    ".gitignore",
     "agent/package.json",
     "agent/src/cli.ts",
     "agent/src/commandRouter.ts",
@@ -41,7 +20,7 @@
     "package.json",
     "tsconfig.base.json"
   ],
-  "fileCount": 40,
-  "head": "13a9dd3dc405661af6fda571d0c7aa7e8f966ef4",
-  "lastScan": "2026-02-28T12:42:46.379Z"
+  "fileCount": 19,
+  "head": "ac85eb2fca241c3fd4e53eadc6aab0cd3c4e7ba5",
+  "lastScan": "2026-02-28T12:46:59.018Z"
 }
