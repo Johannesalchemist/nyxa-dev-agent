@@ -6,9 +6,19 @@ import { resolveStableIdentity } from "../core/identityResolver";
 export function runCommand(): void {
   const rootPath = path.resolve(__dirname, "../../../");
 
-  // Stage everything first
+  // Stage everything
   execSync("git add -A", { cwd: rootPath });
 
+  // Commit code changes if any
+  const diff = execSync("git diff --cached --name-only", { cwd: rootPath })
+    .toString()
+    .trim();
+
+  if (diff.length > 0) {
+    execSync(`git commit -m "[nyxa-agent] code sync"`, { cwd: rootPath });
+  }
+
+  // Resolve identity AFTER code commit
   const identity = resolveStableIdentity(rootPath);
 
   const stateDir = path.join(rootPath, "kernel", "state");
@@ -26,11 +36,10 @@ export function runCommand(): void {
 
   execSync("git add kernel/state/.nyxa-state", { cwd: rootPath });
 
-  try {
-    const message = `[nyxa-agent] run :: ${new Date(identity.generatedAt).toISOString()}`;
-    execSync(`git commit -m "${message}"`, { cwd: rootPath });
-    console.log("[nyxa-agent] run committed successfully");
-  } catch {
-    console.log("[nyxa-agent] nothing to commit");
-  }
+  execSync(
+    `git commit -m "[nyxa-agent] state :: ${identity.head}"`,
+    { cwd: rootPath }
+  );
+
+  console.log("[nyxa-agent] run completed");
 }
