@@ -1,4 +1,4 @@
-﻿import * as fs from "fs";
+import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
 import { createHash } from "crypto";
@@ -10,13 +10,16 @@ function normalize(p: string): string {
 function collectFiles(dir: string, root: string, result: string[]): void {
   const entries = fs.readdirSync(dir);
   for (const entry of entries) {
-    if (entry === ".git" || entry === "node_modules") continue;
+    if (entry === ".git" || entry === "node_modules" || entry === "dist") continue;
     const fullPath = path.join(dir, entry);
     const stat = fs.statSync(fullPath);
     if (stat.isDirectory()) {
       collectFiles(fullPath, root, result);
     } else {
-      result.push(normalize(path.relative(root, fullPath)));
+      const relative = normalize(path.relative(root, fullPath));
+      if (relative !== "kernel/state/.nyxa-state") {
+        result.push(relative);
+      }
     }
   }
 }
@@ -54,14 +57,17 @@ export function validateCommand(): void {
     console.error("[nyxa-agent] working tree not clean");
     process.exit(1);
   }
+
   if (state.head !== head) {
     console.error("[nyxa-agent] HEAD mismatch");
     process.exit(1);
   }
+
   if (state.treeHash !== treeHash) {
     console.error("[nyxa-agent] treeHash mismatch");
     process.exit(1);
   }
+
   if (state.manifestHash !== manifestHash) {
     console.error("[nyxa-agent] manifestHash mismatch");
     process.exit(1);
