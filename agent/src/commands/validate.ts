@@ -1,6 +1,7 @@
 ﻿import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
+import { createHash } from "crypto";
 
 function normalize(p: string): string {
   return p.replace(/\\/g, "/");
@@ -8,73 +9,61 @@ function normalize(p: string): string {
 
 function collectFiles(dir: string, root: string, result: string[]): void {
   const entries = fs.readdirSync(dir);
-
   for (const entry of entries) {
+    if (entry === ".git" || entry === "node_modules") continue;
     const fullPath = path.join(dir, entry);
     const stat = fs.statSync(fullPath);
-
-    if (entry === ".git" || entry === "node_modules") continue;
-
     if (stat.isDirectory()) {
       collectFiles(fullPath, root, result);
     } else {
-      const relative = normalize(path.relative(root, fullPath));
-      result.push(relative);
+      result.push(normalize(path.relative(root, fullPath)));
     }
   }
 }
 
-export function validateCommand(): void {
-  const rootPath = "C:\\Users\\Johannes\\nyxa-dev-agent";
-  const statePath = path.join(rootPath, "kernel", "state");
-  const metaPath = path.join(statePath, "meta.json");
-  const summaryPath = path.join(statePath, "summary.json");
-
-  const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
-  const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
-
-  const head = execSync("git rev-parse HEAD", { cwd: rootPath })
-    .toString()
-    .trim();
-
-  const parent = execSync("git rev-parse HEAD~1", { cwd: rootPath })
-    .toString()
-    .trim();
-
-  if (summary.head !== head) {
-    console.error("[nyxa-agent] summary HEAD mismatch");
-    process.exit(1);
-  }
-
-  if (meta.lastCommitHash !== parent) {
-    console.error("[nyxa-agent] meta does not reference run commit");
-    process.exit(1);
-  }
-
+function computeManifestHash(rootPath: string): string {
   const files: string[] = [];
   collectFiles(rootPath, rootPath, files);
-
   files.sort();
-  summary.projectStructure.sort();
+  const hash = createHash("sha256");
+  for (const file of files) {
+    const content = fs.readFileSync(path.join(rootPath, file));
+    hash.update(file);
+    hash.update(content);
+  }
+  return hash.digest("hex");
+}
 
-  if (files.length !== summary.fileCount) {
-    console.error("[nyxa-agent] fileCount mismatch");
+export function validateCommand(): void {
+  const rootPath = path.resolve(__dirname, "../../../");
+  const stateFile = path.join(rootPath, "kernel", "state", ".nyxa-state");
+
+  if (!fs.existsSync(stateFile)) {
+    console.error("[nyxa-agent] missing .nyxa-state");
     process.exit(1);
   }
 
-  for (let i = 0; i < files.length; i++) {
-    if (files[i] !== summary.projectStructure[i]) {
-      console.error("[nyxa-agent] project structure mismatch");
-      process.exit(1);
-    }
-  }
+  const state = JSON.parse(fs.readFileSync(stateFile, "utf8"));
 
-  const statusRaw = execSync("git status --porcelain", { cwd: rootPath })
-    .toString()
-    .trim();
+  const head = execSync("git rev-parse HEAD", { cwd: rootPath }).toString().trim();
+  const treeHash = execSync('git rev-parse "HEAD^{tree}"', { cwd: rootPath }).toString().trim();
+  const statusRaw = execSync("git status --porcelain", { cwd: rootPath }).toString().trim();
+  const manifestHash = computeManifestHash(rootPath);
 
   if (statusRaw.length > 0) {
     console.error("[nyxa-agent] working tree not clean");
+    process.exit(1);
+  }
+  if (state.head !== head) {
+    console.error("[nyxa-agent] HEAD mismatch");
+    process.exit(1);
+  }
+  if (state.treeHash !== treeHash) {
+    console.error("[nyxa-agent] treeHash mismatch");
+    process.exit(1);
+  }
+  if (state.manifestHash !== manifestHash) {
+    console.error("[nyxa-agent] manifestHash mismatch");
     process.exit(1);
   }
 
