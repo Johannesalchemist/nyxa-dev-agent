@@ -9,35 +9,23 @@ export function commitWithGit(rootPath: string, metaPath: string, timestamp: str
     execSync("git init", { cwd: rootPath });
   }
 
+  // Stage everything (meta currently has empty hash)
   execSync("git add .", { cwd: rootPath });
 
   const message = `[nyxa-agent] init :: ${timestamp}`;
   execSync(`git commit -m "${message}"`, { cwd: rootPath });
 
-  // First hash (before amend)
-  const firstHash = execSync("git rev-parse HEAD", { cwd: rootPath })
-    .toString()
-    .trim();
-
-  // Update meta with first hash
-  const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
-  meta.lastCommitHash = firstHash;
-  fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), { encoding: "utf8" });
-
-  execSync("git add kernel/state/meta.json", { cwd: rootPath });
-  execSync("git commit --amend --no-edit", { cwd: rootPath });
-
-  // FINAL hash after amend
+  // FINAL hash after first commit
   const finalHash = execSync("git rev-parse HEAD", { cwd: rootPath })
     .toString()
     .trim();
 
-  // Write correct final hash
-  const updatedMeta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
-  updatedMeta.lastCommitHash = finalHash;
+  // Update meta with correct hash
+  const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
+  meta.lastCommitHash = finalHash;
+  fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), { encoding: "utf8" });
 
-  fs.writeFileSync(metaPath, JSON.stringify(updatedMeta, null, 2), { encoding: "utf8" });
-
+  // Amend once
   execSync("git add kernel/state/meta.json", { cwd: rootPath });
   execSync("git commit --amend --no-edit", { cwd: rootPath });
 
