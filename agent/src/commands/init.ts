@@ -1,6 +1,7 @@
 ﻿import * as fs from "fs";
 import * as path from "path";
 import { commitWithGit } from "../core/versionController";
+import { updateSummary } from "../core/summaryEngine";
 
 export function initCommand(): void {
   const rootPath = "C:\\Users\\Johannes\\nyxa-dev-agent";
@@ -27,16 +28,15 @@ export function initCommand(): void {
     timestamp
   };
 
-  const summary = {
-    projectStructure: ["kernel/state"],
-    fileCount: 2,
-    lastScan: timestamp
-  };
-
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), { encoding: "utf8" });
-  fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2), { encoding: "utf8" });
 
-  const commitHash = commitWithGit(rootPath, metaPath, timestamp);
+  if (!fs.existsSync(summaryPath)) {
+    fs.writeFileSync(summaryPath, JSON.stringify({}, null, 2), { encoding: "utf8" });
+  }
 
-  console.log(`[nyxa-agent] kernel initialized and committed (${commitHash})`);
+  const initHash = commitWithGit(rootPath, metaPath, timestamp);
+
+  updateSummary(rootPath);
+
+  console.log(`[nyxa-agent] kernel initialized and committed (${initHash})`);
 }
