@@ -2,3 +2,5 @@
 agent/dist/
 dist/
 *.log
+
+kernel/state/.nyxa-state
