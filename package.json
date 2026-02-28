@@ -1,0 +1,24 @@
+﻿{
+  "name": "nyxa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nyxa Monorepo - Deterministic Dev-Agent Architecture",
+  "license": "MIT",
+  "workspaces": [
+    "agent"
+  ],
+  "bin": {
+    "nyxa-agent": "agent/dist/cli.js"
+  },
+  "scripts": {
+    "build": "npm run build --workspace=agent",
+    "dev": "npm run dev --workspace=agent",
+    "init": "node agent/dist/cli.js init",
+    "run": "node agent/dist/cli.js run",
+    "summarize": "node agent/dist/cli.js summarize",
+    "validate": "node agent/dist/cli.js validate"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
