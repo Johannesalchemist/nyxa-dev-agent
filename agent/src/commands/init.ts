@@ -1,42 +1,18 @@
-﻿import * as fs from "fs";
-import * as path from "path";
-import { commitWithGit } from "../core/versionController";
+﻿import * as path from "path";
+import { execSync } from "child_process";
 import { updateSummary } from "../core/summaryEngine";
 
 export function initCommand(): void {
-  const rootPath = "C:\\Users\\Johannes\\nyxa-dev-agent";
-  const kernelPath = path.join(rootPath, "kernel");
-  const statePath = path.join(kernelPath, "state");
-
-  if (!fs.existsSync(kernelPath)) {
-    fs.mkdirSync(kernelPath);
-  }
-
-  if (!fs.existsSync(statePath)) {
-    fs.mkdirSync(statePath);
-  }
+  const rootPath = path.resolve(__dirname, "../../../");
 
   const timestamp = new Date().toISOString();
 
-  const metaPath = path.join(statePath, "meta.json");
-  const summaryPath = path.join(statePath, "summary.json");
+  execSync("git add .", { cwd: rootPath });
+  execSync(`git commit -m "[nyxa-agent] init :: ${timestamp}"`, { cwd: rootPath });
 
-  const meta = {
-    version: "1.0.0",
-    lastCommitHash: "",
-    lastCommand: "init",
-    timestamp
-  };
+  const runHash = execSync("git rev-parse HEAD", { cwd: rootPath }).toString().trim();
 
-  fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), { encoding: "utf8" });
+  updateSummary(rootPath, runHash);
 
-  if (!fs.existsSync(summaryPath)) {
-    fs.writeFileSync(summaryPath, JSON.stringify({}, null, 2), { encoding: "utf8" });
-  }
-
-  const initHash = commitWithGit(rootPath, metaPath, timestamp);
-
-  updateSummary(rootPath);
-
-  console.log(`[nyxa-agent] kernel initialized and committed (${initHash})`);
+  console.log("[nyxa-agent] init completed");
 }

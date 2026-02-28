@@ -8,6 +8,8 @@
     "agent/src/commands/run.ts",
     "agent/src/commands/summarize.ts",
     "agent/src/commands/validate.ts",
+    "agent/src/core/fitnessEngine.ts",
+    "agent/src/core/labRunner.ts",
     "agent/src/core/orchestrator.ts",
     "agent/src/core/structureGuard.ts",
     "agent/src/core/summaryEngine.ts",
@@ -20,7 +22,7 @@
     "package.json",
     "tsconfig.base.json"
   ],
-  "fileCount": 19,
-  "head": "0434931ac0ad3ee3949ae00c526792965542a770",
-  "lastScan": "2026-02-28T12:52:04.585Z"
+  "fileCount": 21,
+  "head": "c3ef7e25b0f0b55f176de2a0dd3e0403a608db1a",
+  "lastScan": "2026-02-28T14:12:08.467Z"
 }
