@@ -9,25 +9,27 @@ export function commitWithGit(rootPath: string, metaPath: string, timestamp: str
     execSync("git init", { cwd: rootPath });
   }
 
-  // Stage everything (meta currently has empty hash)
+  // Stage everything
   execSync("git add .", { cwd: rootPath });
 
   const message = `[nyxa-agent] init :: ${timestamp}`;
   execSync(`git commit -m "${message}"`, { cwd: rootPath });
 
-  // FINAL hash after first commit
-  const finalHash = execSync("git rev-parse HEAD", { cwd: rootPath })
+  // Hash of init commit
+  const initHash = execSync("git rev-parse HEAD", { cwd: rootPath })
     .toString()
     .trim();
 
-  // Update meta with correct hash
+  // Update meta with previous commit hash
   const meta = JSON.parse(fs.readFileSync(metaPath, "utf8"));
-  meta.lastCommitHash = finalHash;
+  meta.lastCommitHash = initHash;
+
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), { encoding: "utf8" });
 
-  // Amend once
   execSync("git add kernel/state/meta.json", { cwd: rootPath });
-  execSync("git commit --amend --no-edit", { cwd: rootPath });
 
-  return finalHash;
+  const syncMessage = `[nyxa-agent] sync meta :: ${timestamp}`;
+  execSync(`git commit -m "${syncMessage}"`, { cwd: rootPath });
+
+  return initHash;
 }
