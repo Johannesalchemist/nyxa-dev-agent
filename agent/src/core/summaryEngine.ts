@@ -2,6 +2,14 @@
 import * as path from "path";
 import { execSync } from "child_process";
 
+function shouldIgnore(relativePath: string): boolean {
+  const segments = relativePath.split(/[\\/]/);
+
+  return segments.includes(".git") ||
+         segments.includes("node_modules") ||
+         segments.includes("dist");
+}
+
 function walk(dir: string, root: string, result: string[]) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -9,12 +17,7 @@ function walk(dir: string, root: string, result: string[]) {
     const fullPath = path.join(dir, entry.name);
     const relativePath = path.relative(root, fullPath);
 
-    // Ignore rules
-    if (
-      relativePath.startsWith(".git") ||
-      relativePath.startsWith("node_modules") ||
-      relativePath.startsWith("agent/dist")
-    ) {
+    if (shouldIgnore(relativePath)) {
       continue;
     }
 
