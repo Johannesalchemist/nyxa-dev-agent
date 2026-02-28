@@ -26,13 +26,13 @@ export function runCommand(): void {
 
   ensureStructure(rootPath);
 
-  updateSummary(rootPath);
-
+  // 🔎 1️⃣ Check changes BEFORE summary update
   const statusRaw = execSync("git status --porcelain", { cwd: rootPath })
     .toString()
     .trim();
 
   if (!statusRaw) {
+    updateSummary(rootPath);
     console.log("[nyxa-agent] no changes detected");
     return;
   }
@@ -42,12 +42,17 @@ export function runCommand(): void {
     .map(line => line.substring(3))
     .filter(isSourceChange);
 
+  // 🧠 2️⃣ If no real source change → do NOT commit
   if (sourceChanges.length === 0) {
+    updateSummary(rootPath);
     console.log("[nyxa-agent] no source changes detected");
     return;
   }
 
+  // 🚀 3️⃣ Real source change
   const timestamp = new Date().toISOString();
+
+  updateSummary(rootPath);
 
   execSync("git add .", { cwd: rootPath });
 
