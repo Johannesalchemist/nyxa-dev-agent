@@ -21,7 +21,9 @@
     "summarize": "node agent/dist/cli.js summarize",
     "validate": "node agent/dist/cli.js validate",
     "lab": "node agent/dist/cli.js lab",
-    "sync": "npm run build && node agent/dist/cli.js init && node agent/dist/cli.js validate"
+    "sync": "npm run build && node agent/dist/cli.js init && node agent/dist/cli.js validate",
+    "preflight": "npm run build --workspace=agent && npm run test --workspace=agent && node agent/dist/cli.js validate",
+    "release:check": "npm run preflight"
   },
   "engines": {
     "node": ">=18.0.0"
