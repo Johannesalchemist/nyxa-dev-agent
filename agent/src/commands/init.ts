@@ -1,7 +1,15 @@
 import { execSync } from "child_process"
+import * as fs from "fs"
+import * as path from "path"
+import { resolveStableIdentity } from "../core/identityResolver"
 
 export function initCommand() {
-  const status = execSync("git status --porcelain").toString().trim()
+  const rootPath = path.resolve(__dirname, "../../../")
+  const statePath = path.join(rootPath, "kernel", "state", ".nyxa-state")
+
+  const status = execSync("git status --porcelain", { cwd: rootPath })
+    .toString()
+    .trim()
 
   if (!status) {
     console.log("[nyxa-agent] already clean, init skipped")
@@ -11,8 +19,15 @@ export function initCommand() {
   const timestamp = new Date().toISOString()
   const message = "[nyxa-agent] init :: " + timestamp
 
-  execSync("git add -A", { stdio: "inherit" })
-  execSync('git commit -m "' + message + '"', { stdio: "inherit" })
+  execSync("git add -A", { cwd: rootPath, stdio: "inherit" })
+  execSync('git commit -m "' + message + '"', { cwd: rootPath, stdio: "inherit" })
 
-  console.log("[nyxa-agent] init commit created")
+  const identity = resolveStableIdentity(rootPath)
+
+  fs.writeFileSync(statePath, JSON.stringify(identity, null, 2))
+
+  execSync("git add " + statePath, { cwd: rootPath, stdio: "inherit" })
+  execSync('git commit -m "[nyxa-agent] update state"', { cwd: rootPath, stdio: "inherit" })
+
+  console.log("[nyxa-agent] init completed and state synchronized")
 }
