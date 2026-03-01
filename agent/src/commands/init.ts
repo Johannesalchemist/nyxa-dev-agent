@@ -1,18 +1,18 @@
-﻿import * as path from "path";
-import { execSync } from "child_process";
-import { updateSummary } from "../core/summaryEngine";
+import { execSync } from "child_process"
 
-export function initCommand(): void {
-  const rootPath = path.resolve(__dirname, "../../../");
+export function initCommand() {
+  const status = execSync("git status --porcelain").toString().trim()
 
-  const timestamp = new Date().toISOString();
+  if (!status) {
+    console.log("[nyxa-agent] already clean, init skipped")
+    return
+  }
 
-  execSync("git add .", { cwd: rootPath });
-  execSync(`git commit -m "[nyxa-agent] init :: ${timestamp}"`, { cwd: rootPath });
+  const timestamp = new Date().toISOString()
+  const message = "[nyxa-agent] init :: " + timestamp
 
-  const runHash = execSync("git rev-parse HEAD", { cwd: rootPath }).toString().trim();
+  execSync("git add -A", { stdio: "inherit" })
+  execSync('git commit -m "' + message + '"', { stdio: "inherit" })
 
-  updateSummary(rootPath, runHash);
-
-  console.log("[nyxa-agent] init completed");
+  console.log("[nyxa-agent] init commit created")
 }
