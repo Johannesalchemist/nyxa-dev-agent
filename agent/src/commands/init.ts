@@ -26,8 +26,5 @@ export function initCommand() {
 
   fs.writeFileSync(statePath, JSON.stringify(identity, null, 2))
 
-  execSync("git add " + statePath, { cwd: rootPath, stdio: "inherit" })
-  execSync('git commit -m "[nyxa-agent] update state"', { cwd: rootPath, stdio: "inherit" })
-
-  console.log("[nyxa-agent] init completed and state synchronized")
+  console.log("[nyxa-agent] init completed and state refreshed (not committed)")
 }
