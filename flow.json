@@ -1,0 +1,4 @@
+{
+  "contract": "1.0",
+  "flow": ["validate", "run", "summarize"]
+}
