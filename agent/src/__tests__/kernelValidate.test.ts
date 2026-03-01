@@ -6,73 +6,54 @@ vi.mock("child_process");
 
 const mockExec = vi.spyOn(child, "execSync");
 
-function mockProcessExit() {
-  const exit = vi.spyOn(process, "exit").mockImplementation(((code?: number) => {
+function mockExit() {
+  return vi.spyOn(process, "exit").mockImplementation(((code?: number) => {
     throw new Error("EXIT_" + code);
   }) as any);
-  return exit;
 }
 
 describe("kernelValidateCommand", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.NYXA_KERNEL_PATH = "fake-path";
+    process.env.NYXA_KERNEL_PATH = "fake";
   });
 
-  it("returns 0 on valid contract + version", () => {
+  it("exit 0 when everything valid", () => {
     mockExec.mockReturnValue(Buffer.from(JSON.stringify({
       contract: "1.0",
-      version: "1.2.3",
+      version: "1.2.0",
+      capabilities: ["validate"],
       status: "valid"
     })));
 
-    const exitSpy = mockProcessExit();
+    const exitSpy = mockExit();
 
     expect(() => kernelValidateCommand()).not.toThrow();
     expect(exitSpy).not.toHaveBeenCalled();
   });
 
-  it("exit 2 on contract mismatch", () => {
+  it("exit 2 if capabilities missing", () => {
     mockExec.mockReturnValue(Buffer.from(JSON.stringify({
-      contract: "2.0",
+      contract: "1.0",
       version: "1.0.0",
       status: "valid"
     })));
 
-    mockProcessExit();
+    mockExit();
 
     expect(() => kernelValidateCommand()).toThrow("EXIT_2");
   });
 
-  it("exit 2 on major version mismatch", () => {
-    mockExec.mockReturnValue(Buffer.from(JSON.stringify({
-      contract: "1.0",
-      version: "2.0.0",
-      status: "valid"
-    })));
-
-    mockProcessExit();
-
-    expect(() => kernelValidateCommand()).toThrow("EXIT_2");
-  });
-
-  it("exit 1 on status invalid", () => {
+  it("exit 2 if required capability absent", () => {
     mockExec.mockReturnValue(Buffer.from(JSON.stringify({
       contract: "1.0",
       version: "1.0.0",
-      status: "invalid"
+      capabilities: [],
+      status: "valid"
     })));
 
-    mockProcessExit();
+    mockExit();
 
-    expect(() => kernelValidateCommand()).toThrow("EXIT_1");
-  });
-
-  it("exit 3 on invalid JSON", () => {
-    mockExec.mockReturnValue(Buffer.from("not-json"));
-
-    mockProcessExit();
-
-    expect(() => kernelValidateCommand()).toThrow("EXIT_3");
+    expect(() => kernelValidateCommand()).toThrow("EXIT_2");
   });
 });

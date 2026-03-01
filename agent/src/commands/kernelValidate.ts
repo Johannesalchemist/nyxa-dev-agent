@@ -3,6 +3,7 @@ import * as path from "path";
 
 const EXPECTED_CONTRACT = "1.0";
 const EXPECTED_MAJOR = "1";
+const REQUIRED_CAPABILITIES = ["validate"];
 
 export function kernelValidateCommand(): void {
   const kernelPath = process.env.NYXA_KERNEL_PATH;
@@ -33,13 +34,11 @@ export function kernelValidateCommand(): void {
     process.exit(3);
   }
 
-  // Contract check
   if (parsed.contract !== EXPECTED_CONTRACT) {
     console.error("[nyxa-agent] contract mismatch");
     process.exit(2);
   }
 
-  // Version check
   if (typeof parsed.version !== "string") {
     console.error("[nyxa-agent] invalid version format");
     process.exit(3);
@@ -52,7 +51,18 @@ export function kernelValidateCommand(): void {
     process.exit(2);
   }
 
-  // Status check
+  if (!Array.isArray(parsed.capabilities)) {
+    console.error("[nyxa-agent] capabilities missing");
+    process.exit(2);
+  }
+
+  for (const required of REQUIRED_CAPABILITIES) {
+    if (!parsed.capabilities.includes(required)) {
+      console.error("[nyxa-agent] required capability missing");
+      process.exit(2);
+    }
+  }
+
   if (parsed.status !== "valid") {
     console.error("[nyxa-agent] kernel validation failed");
     process.exit(1);
