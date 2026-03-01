@@ -1,12 +1,11 @@
-﻿import { NyxaCommand } from "./types";
 import { initCommand } from "./commands/init";
 import { runCommand } from "./commands/run";
 import { summarizeCommand } from "./commands/summarize";
 import { validateCommand } from "./commands/validate";
-import { runLab } from "./core/labRunner";
+import { kernelValidateCommand } from "./commands/kernelValidate";
 
-export function routeCommand(command: string): void {
-  switch (command as NyxaCommand | "lab") {
+export function routeCommand(command: string | undefined): void {
+  switch (command) {
     case "init":
       initCommand();
       break;
@@ -23,12 +22,12 @@ export function routeCommand(command: string): void {
       validateCommand();
       break;
 
-    case "lab":
-      runLab("C:\\Users\\Johannes\\nyxa-dev-agent");
+    case "kernel-validate":
+      kernelValidateCommand();
       break;
 
     default:
-      console.error(`[nyxa-agent] unknown command: ${command}`);
-      process.exit(1);
+      console.error("[nyxa-agent] unknown command");
+      process.exit(2);
   }
 }
