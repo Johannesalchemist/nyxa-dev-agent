@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amuse Events</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>Amuse Events</h1>
+      <nav>
+        <button class="nav-btn active" data-view="map">Map</button>
+        <button class="nav-btn" data-view="feed">Feed</button>
+        <button class="nav-btn" data-view="create">Create</button>
+        <button class="nav-btn" data-view="roulette">Roulette</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- MAP VIEW -->
+    <section id="view-map" class="view active">
+      <div id="map"></div>
+      <div id="map-stats">
+        <span id="event-count">0 events nearby</span>
+        <span id="heatmap-count">0 active zones</span>
+      </div>
+    </section>
+
+    <!-- FEED VIEW -->
+    <section id="view-feed" class="view">
+      <div class="feed-filters">
+        <select id="filter-type">
+          <option value="">All Types</option>
+          <option value="date">Date</option>
+          <option value="coffee">Coffee</option>
+          <option value="walk">Walk</option>
+          <option value="group">Group</option>
+          <option value="adventure">Adventure</option>
+          <option value="mystery">Mystery</option>
+          <option value="speeddate">Speed Date</option>
+          <option value="instant_date">Instant Date</option>
+        </select>
+      </div>
+      <div id="feed-list"></div>
+    </section>
+
+    <!-- CREATE VIEW -->
+    <section id="view-create" class="view">
+      <form id="create-form">
+        <h2>Create Event</h2>
+        <label>Title
+          <input type="text" id="ev-title" required placeholder="Coffee at the park">
+        </label>
+        <label>Description
+          <textarea id="ev-desc" rows="3" placeholder="What's the plan?"></textarea>
+        </label>
+        <label>Location Name
+          <input type="text" id="ev-location" required placeholder="Central Park">
+        </label>
+        <div class="row">
+          <label>Lat <input type="number" step="any" id="ev-lat" required></label>
+          <label>Lng <input type="number" step="any" id="ev-lng" required></label>
+          <button type="button" id="use-my-location" class="btn-small">Use my location</button>
+        </div>
+        <div class="row">
+          <label>Type
+            <select id="ev-type">
+              <option value="coffee">Coffee</option>
+              <option value="walk">Walk</option>
+              <option value="date">Date</option>
+              <option value="group">Group</option>
+              <option value="adventure">Adventure</option>
+              <option value="mystery">Mystery</option>
+              <option value="speeddate">Speed Date</option>
+              <option value="instant_date">Instant Date</option>
+            </select>
+          </label>
+          <label>Visibility
+            <select id="ev-visibility">
+              <option value="public">Public</option>
+              <option value="dating_match">Dating Match</option>
+              <option value="room_only">Room Only</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label>Start Time
+            <input type="datetime-local" id="ev-start" required>
+          </label>
+          <label>Max Participants
+            <input type="number" id="ev-max" min="2" placeholder="No limit">
+          </label>
+        </div>
+        <label class="checkbox-label">
+          <input type="checkbox" id="ev-premium"> Premium creator
+        </label>
+        <button type="submit" class="btn-primary">Create Event</button>
+        <div id="create-result"></div>
+      </form>
+    </section>
+
+    <!-- ROULETTE VIEW -->
+    <section id="view-roulette" class="view">
+      <div class="roulette-container">
+        <h2>Blind Date Roulette</h2>
+        <p>Press the button and let fate decide.</p>
+        <button id="roulette-btn" class="btn-roulette">Surprise me</button>
+        <div id="roulette-result"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Event detail modal -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close">&times;</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
